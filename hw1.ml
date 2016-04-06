@@ -13,10 +13,13 @@ let (add : 'a -> 'a list -> 'a list) =
   fun x s ->
   	if member x s then s else x::s;;
 
-(*let (union : 'a list -> 'a list -> 'a list) =
-  raise ImplementMe
+let rec (union : 'a list -> 'a list -> 'a list) =
+  fun s1 s2 ->
+  match s1 with 
+  	[] -> s2
+|	h::t -> if member h s2 then union t s2 else h::(union t s2);;
 
-let (fastUnion : 'a list -> 'a list -> 'a list) =
+(*let (fastUnion : 'a list -> 'a list -> 'a list) =
   raise ImplementMe
                 
 let (intersection : 'a list -> 'a list -> 'a list) =
