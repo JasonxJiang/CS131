@@ -34,13 +34,17 @@ let rec (fastUnion : 'a list -> 'a list -> 'a list) =
 					
 (*testing*)
                 
-(*let (intersection : 'a list -> 'a list -> 'a list) =
-  raise ImplementMe
+let (intersection : 'a list -> 'a list -> 'a list) =
+  fun s1 s2 -> match s2 with 
+  		[] -> []
+	| 	h::t -> List.filter((fun x -> (member x s1))) s2;;
                 
-let (setify : 'a list -> 'a list) =
-  raise ImplementMe
+let rec (setify : 'a list -> 'a list) =
+  fun l -> match l with 
+  		[] -> []
+	|	h::t -> if (member h t) then setify t else h::(setify t)
          
-let rec (powerset : 'a list -> 'a list list) =
+(*let rec (powerset : 'a list -> 'a list list) =
   raise ImplementMe
 
         
