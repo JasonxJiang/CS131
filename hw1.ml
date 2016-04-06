@@ -17,12 +17,24 @@ let rec (union : 'a list -> 'a list -> 'a list) =
   fun s1 s2 ->
   match s1 with 
   	[] -> s2
-|	h::t -> if member h s2 then union t s2 else h::(union t s2);;
+|	h::t -> if (member h s2) then union t s2 else h::(union t s2);;
 
-(*let (fastUnion : 'a list -> 'a list -> 'a list) =
-  raise ImplementMe
+let rec (fastUnion : 'a list -> 'a list -> 'a list) =
+  fun s1 s2 ->
+  match s1 with 
+  	[] -> s2 
+|	h1::t1 -> match s2 with 
+				[] -> h1::(fastUnion t1 s2)
+			|	h2::t2 -> if (h1<h2) then 
+					h1::(fastUnion t1 s2)
+				else if (h2<h1) then
+					h2::(fastUnion s1 t2)
+				else 
+					h1::(fastUnion t1 t2);;
+					
+(*testing*)
                 
-let (intersection : 'a list -> 'a list -> 'a list) =
+(*let (intersection : 'a list -> 'a list -> 'a list) =
   raise ImplementMe
                 
 let (setify : 'a list -> 'a list) =

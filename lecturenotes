@@ -1,0 +1,7 @@
+Higher-order functions
+	functions from/to other functions 
+
+Examples 
+ -applyToFirst: applies an input function to the first component of an input pair. 
+ - map: apply a function to every elem of a list 
+ - filter: selects elems of a list that fulfill a certain predicate.
