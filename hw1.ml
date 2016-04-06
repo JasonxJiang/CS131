@@ -9,10 +9,11 @@ let rec  (member : 'a -> 'a list -> bool) =
 	[] -> false
 |	h::t -> if x=h then true else (member x t);; 
 
-(*let (add : 'a -> 'a list -> 'a list) =
-  raise ImplementMe
+let (add : 'a -> 'a list -> 'a list) =
+  fun x s ->
+  	if member x s then s else x::s;;
 
-let (union : 'a list -> 'a list -> 'a list) =
+(*let (union : 'a list -> 'a list -> 'a list) =
   raise ImplementMe
 
 let (fastUnion : 'a list -> 'a list -> 'a list) =
