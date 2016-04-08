@@ -43,10 +43,16 @@ let rec (setify : 'a list -> 'a list) =
   		[] -> []
 	|	h::t -> if (member h t) then setify t else h::(setify t)
          
-(*let rec (powerset : 'a list -> 'a list list) =
-  fun l -> match l with 
-  	[] -> [[]] 
-|	h::t -> h::(h::(powerset t))::(powerset t);;*)
+let rec applyToAll = 
+	fun f acc l -> match l with 
+		[] -> acc 
+	|	h::t -> applyToAll f (f acc h) t
+
+
+let rec (powerset : 'a list -> 'a list list) =
+	fun l -> match l with 
+		[] -> [[]]
+	| h::t -> applyToAll(fun xs t -> (h::t)::t::xs) [] (powerset t);;	
 
         
 (* Problem 2 *)        
@@ -62,10 +68,15 @@ let rec (whle : ('a -> bool) -> ('a -> 'a) -> 'a -> 'a) =
   fun p f x -> if (p x) then (whle p f (f x)) else x;;
   
 let rec (pow : int -> ('a -> 'a) -> ('a -> 'a)) =
+	fun n f -> match n with 
+				0 -> (fun x -> x)
+			|	_	-> (fun x -> f (pow (n-1) f x));;
+			
+(*let rec (pow : int -> ('a -> 'a) -> ('a -> 'a)) =
   fun n f -> if n=0 then f 
                                   
 let rec (pow : int -> ('a -> 'a) -> ('a -> 'a)) =
   fun f n -> match n with 
 	0 -> (function x -> x)
 |	_ -> (f pow f (n-1));;
-		     
+*)

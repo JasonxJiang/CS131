@@ -50,18 +50,13 @@ let rec (setify : 'a list -> 'a list) =
 
         
 (* Problem 2 *)        
-let (partition : ('a -> bool) -> 'a list -> 'a list ) =
-  fun x s1 -> List.filter(x) s1;;
 
 
-let (partition : ('a -> bool) -> 'a list -> 'a list * 'a list) =
-	fun x s1 -> match s1 with 
+let rec (partition : ('a -> bool) -> 'a list -> 'a list * 'a list) =
+	fun x s -> match s with 
 		[] -> ([], [])
-	|	h::t -> if (x h) then
-			let (p1, p2) = (partition x t) in 
-			 	(h::p1,p2) 
-			else let (p3, p4) = (partition x t) in
-				(p3, h::p4);;
+	|	h::t -> let (y, z) = (partition x t) in
+			if (x h) then (h::y, z) else (y, h::z);;
 
 let rec (whle : ('a -> bool) -> ('a -> 'a) -> 'a -> 'a) =
   fun p f x -> if (p x) then (whle p f (f x)) else x;;
