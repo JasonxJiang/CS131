@@ -7,15 +7,29 @@ exception ImplementMe
 type vector = float list                                 
 type matrix = vector list
 
+
 let (vplus : vector -> vector -> vector) =
-  raise ImplementMe
-(*)
+  fun v1 v2 -> List.map2 (+.) v1 v2;; 
+
+let  (vmult : vector -> vector -> vector) = 
+  fun v1 v2 -> List.map2 ( *. ) v1 v2;;
+
+let v1 = [1.;2.;3.];;
+let v2 = [4.;5.;6.];;
+let v3 = [7.;8.;9.];;
+let m1 = [v1;v2;v3];;
+
+
+
 let (mplus : matrix -> matrix -> matrix) =
-  raise ImplementMe
+  fun m1 m2 -> List.map2 vplus m1 m2
 
+
+(*
 let (dotprod : vector -> vector -> float) =
-  raise ImplementMe
-
+  fun v1 v2 -> let composed = vmult v1 v2 in
+    List.fold_left (+.) composed 0;;*)
+(*
 let (transpose : matrix -> matrix) =
   raise ImplementMe
 
@@ -35,7 +49,7 @@ let (evalExp : exp -> float) =
 (* a type for stack instructions *)	  
 type instr = Push of float | Swap | Calculate of op
 
-let (execute : instr list -> float) =
+let (execute : instr list -> float) 
   raise ImplementMe
       
 let (compile : exp -> instr list) =
