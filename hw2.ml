@@ -41,12 +41,12 @@ let (dotprod : vector -> vector -> float) =
 let row1 = List.map (fun l -> List.nth l 0) m1;;
 (* Access Column of a matrix and create a row *)
 
-(*let generateEmptyList =
+let generateEmptyList =
   fun m1 -> match m1 with 
       [] -> []
-    | h -> List.fold_left(fun acc restOfList -> if(acc<List.length h) then restOfList@[[]]) [[]] 0
-    | h::t ->  
-*)
+    | h -> List.map (fun x-> []) h
+    | h::t -> List.map (fun x -> []) h
+
 
 let previous = [];;
 let now = v1;;
@@ -56,28 +56,16 @@ let v5 = List.map (fun x -> previous@[x] ) now;;
 
 let testing = List.map2 (fun x y -> x@[y]) v5 v2;;
 let (transpose : matrix -> matrix) =
-  fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m);;
+  fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) (generateEmptyList m) m);;
 
   (* save this for later working but reversed *)
 (*List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m;;
 *)
 
 
-  (*)
-  List.fold_left (fun row firstPartMatrix -> 
-    (List.map (fun x -> firstPartMatrix @ [x]) row) [] m1*)
-  (*List.fold_right(fun index restOfTransposedMatrix -> 
-    List.map (fun l -> List.nth l 0)::restOfTransposedMatrix) m1 1    *)
 
-(* 
-(* things  in a life *) 
-let const x _ = x;; 
-let cons x xs = x:: xs;; 
 
-(* and then *) 
-let transpose xs = fold_right (map2 cons) xs (map (const []) (hd xs));; 
 
-*)
 
 (* Implement Transpose First! *)
 (* 
