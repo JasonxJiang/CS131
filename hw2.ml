@@ -56,7 +56,7 @@ let v5 = List.map (fun x -> previous@[x] ) now;;
 
 let testing = List.map2 (fun x y -> x@[y]) v5 v2;;
 let (transpose : matrix -> matrix) =
-  fun m -> List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m;;
+  fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m);;
 
   (* save this for later working but reversed *)
 (*List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m;;
