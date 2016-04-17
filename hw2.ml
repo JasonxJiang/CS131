@@ -104,48 +104,79 @@ let second_Last_Elem l =
     List.nth l (List.length l -2)
 
 
+                                                                      
 
-(* for executeHelper assume the insn passed along is no longer in list! *)
-let rec (executeHelper: instr list -> instr -> float) = 
-    fun lst insnType -> match insnType with
-      Swap -> let last = last_Element lst in 
-                  let secLast = second_Last_Elem lst in 
-                    let twoElementsGone = remove_last(remove_last lst) in 
-                        executeHelper (twoElementsGone@[last]) secLast  
-    | Calculate(operator) -> let rOp = last_Element lst in 
-                                let lOp = second_Last_Elem lst in 
-                                  match (rOp, lOp) with 
-                                  (Push(v1), Push(v2))  -> 5. (*executeHelper Push(simpleOp (BinOp(Num(v1), operator, Num(v2))))*)
-                                | _ -> 5.   
-(*
-let rec (execute : instr list -> float) = 
-  fun l -> match l with
-    [] -> 0.
-  | h::t -> let last = List.tl l in 
-             executeHelper (remove_last l) last 
-*)
-
-
+let rec executeHelper1 (*(executeHelper1 : instr list -> float list -> float)*)= 
+  fun insnLst stack -> match insnLst with 
+      [] -> List.hd stack 
+    | h::t -> match h with 
+           Push(v) -> executeHelper1 t (stack@[v])
+        |  Calculate(operator) -> if (List.length stack >1) then 
+                                  let rOp = last_Element stack in 
+                                    let lOp = second_Last_Elem stack in 
+                                      let simpleResult = simpleOp (BinOp(Num(lOp), operator, Num(rOp))) in
+                                        let stackOpsGone = remove_last_two stack in  
+                                          executeHelper1 t (stackOpsGone@[simpleResult])
+                                  else 
+                                    -1.
+        |  Swap -> if (List.length stack > 1) then 
+                    let rOp = last_Element stack in 
+                      let lOp = second_Last_Elem stack in 
+                        let addList = ([rOp]@[lOp]) in 
+                          executeHelper1 t ((remove_last_two stack)@addList)
+                    else 
+                      -1.
 
 let (execute : instr list -> float) =
-  fun l -> if (List.length l = 1) then 
-            match (List.hd l) with 
-              Push(v1) -> v1 
-            | _ -> 5.
-          else  
-              match l with 
-                [] -> 0.       
-              | h::t -> let lastInsn = List.nth l (List.length l -1) in  
-                executeHelper (remove_last l) lastInsn
+  fun l -> match l with 
+      [] -> 0.
+    | h::t -> executeHelper1 l []      
 
 
 
-let test1 = [Push 1.;Push 2.; Swap];;
+let test1 = [Push 1.;Push 2.; Calculate Plus];;
+let test2 = [Push 1.; Push 2.; Calculate Plus; Push 3.; Calculate Times];;
 
-(*      
-let (compile : exp -> instr list) =
-  raise ImplementMe
+(* A type for converting EXP into Binary Trees *)
+type btree = Leaf of float | Node of btree * op * btree 
+      
+let rec (expToTree : exp -> btree) =
+  fun input -> match input with 
+      Num(v) -> Leaf(v)
+    | BinOp(l,op,r) -> Node(expToTree l, op, expToTree r) 
 
+let rec (treeToList : btree -> instr list) =
+    fun tree -> match tree with 
+        Leaf(v) -> [Push(v)]
+      | Node(ltree, op, rtree) -> ((treeToList ltree)@(treeToList rtree )@[Calculate(op)])
+
+
+let test = BinOp(BinOp(Num 1.0, Plus, Num 2.0), Times, Num 3.0);;
+
+type tree = Leaf1 | Node1 of int * tree * tree
+
+let rec in_order = function
+  | Leaf1 -> []
+  | Node1(i,l,r) -> in_order l @ (i :: in_order r);;
+
+let rec preorder = function
+  | Leaf1 -> []
+  | Node1(x, l, r) -> x::preorder l @ preorder r
+
+  let rec postorder = function
+  | Leaf1 -> []
+  | Node1(x, l, r) -> postorder l @ postorder r @ [x]
+
+let tree1 = Node1(5, Node1(3,Node1(1,Leaf1,Leaf1),Leaf1) ,Node1(8,Node1(6,Leaf1,Node1(7,Leaf1,Leaf1)),Leaf1));;
+
+let rec (compile : exp -> instr list) =
+  fun input -> match input with 
+      Num(v) -> [Push(v)]
+    | BinOp(l, op, r) -> let treeInput = expToTree input in
+                          treeToList treeInput
+
+
+(*
 let (decompile : instr list -> exp) =
   raise ImplementMe
 
