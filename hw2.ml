@@ -53,6 +53,9 @@ let (mmult : matrix -> matrix -> matrix) =
   fun m1 m2 ->  List.map2 (fun m1 m2-> List.map (fun row m2 -> (List.map (fun row2 -> dotprod row1 row2) m2 )) m1)  m1 transpose m2;;
 *)
 (* Multiply row by row where m1 * tranpose m2 to build row by row of resultant vector *)
+
+
+
      
 (* Problem 2: Calculators *)           
  
@@ -126,12 +129,12 @@ let (execute : instr list -> float) =
 
 
 
-let test1 = [Push 1.;Push 2.; Calculate Plus];;
-let test2 = [Push 1.; Push 2.; Calculate Plus; Push 3.; Calculate Times];;
+
 
 (* A type for converting EXP into Binary Trees *)
 type btree = Leaf of float | Node of btree * op * btree 
-      
+
+(*helper functions for compile *)
 let rec (expToTree : exp -> btree) =
   fun input -> match input with 
       Num(v) -> Leaf(v)
@@ -142,17 +145,18 @@ let rec (treeToList : btree -> instr list) =
         Leaf(v) -> [Push(v)]
       | Node(ltree, op, rtree) -> ((treeToList ltree)@(treeToList rtree )@[Calculate(op)])
 
-
-let test = BinOp(BinOp(Num 1.0, Plus, Num 2.0), Times, Num 3.0);;
-
+(*2c. Compile Function *)
 let rec (compile : exp -> instr list) =
   fun input -> match input with 
       Num(v) -> [Push(v)]
     | BinOp(l, op, r) -> let treeInput = expToTree input in
                           treeToList treeInput
 
-let compileResult = compile test;;
 
+
+
+
+(*helper function for decompile *)
 let rec (decompileHelper : instr list -> exp list -> exp) =
   fun insnLst stack -> match insnLst with 
     [] -> List.hd stack 
@@ -168,11 +172,35 @@ let rec (decompileHelper : instr list -> exp list -> exp) =
               else 
                 Num(-1.)
 
-                          
+(*2d. Decompile Function *)                         
 let (decompile : instr list -> exp) =
   fun lst -> match lst with 
       [] -> Num(-1.)
     | h::t -> decompileHelper lst [] 
+
+
+
+
+(* helper functions for compileOpt *)
+let rec rightExptoTree = 
+  fun input -> match input with 
+      Num(v) -> Leaf(v) 
+    | BinOp(l,op,r) -> Node(expToTree r, op, expToTree l) 
+
+let rec rightTreetoList = 
+  fun tree -> match tree with 
+    Leaf(v) -> [Push(v)]
+   | Node(ltree, op, rtree) -> match op with 
+        Minus -> ((treeToList ltree)@(treeToList rtree )@[Swap]@[Calculate(op)])
+      | Divide -> ((treeToList ltree)@(treeToList rtree )@[Swap]@[Calculate(op)])
+      | _ ->  ((treeToList ltree)@(treeToList rtree )@[Calculate(op)])  
+
+
+let compileRight =
+  fun input -> match input with 
+      Num(v) -> [Push(v)]
+  | BinOp(l, op, r) -> let treeInput = rightExptoTree input in 
+                        rightTreetoList treeInput
 
 let rec countSize (*(countSize: instr list -> int -> list float -> int)*) = 
   fun lst maxSize stack -> match lst with 
@@ -194,11 +222,32 @@ let rec countSize (*(countSize: instr list -> int -> list float -> int)*) =
                                     countSize t maxSize newStack
                           else 
                             -1
-let test1 = BinOp(Num(1.), Minus, BinOp(Num(2.),Plus,Num(3.)));;       
-(* EXTRA CREDIT *)        
+      | Swap -> if (List.length stack >1) then 
+                  let rOp = last_Element stack in 
+                    let lOp = second_Last_Elem stack in 
+                      countSize t maxSize ((remove_last_two stack)@[rOp]@[lOp])
+                else 
+                  -1
+
+
+
+
+
+(* EXTRA CREDIT *)     
+(*2e. CompileOpt Function *)
+ 
 let (compileOpt : exp -> (instr list * int)) =
   fun input -> let leftCompile = compile input in
-                let maxSize = countSize leftCompile 0 [] in 
-                  (leftCompile, maxSize)
+                let maxSizeL = countSize leftCompile 0 [] in 
+                  let rightCompile = compileRight input in 
+                    let maxSizeR = countSize rightCompile 0 [] in 
+                      if (maxSizeL < maxSizeR) then 
+                        (leftCompile, maxSizeL)
+                      else 
+                        (rightCompile, maxSizeR)
 
 
+
+let test1 = [Push 1.;Push 2.; Calculate Plus]
+let test2 = [Push 1.; Push 2.; Calculate Plus; Push 3.; Calculate Times]    
+let rtest = BinOp(Num(1.), Minus,BinOp(Num(2.), Plus, Num(3.)))
