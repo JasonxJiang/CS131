@@ -38,12 +38,12 @@ let row1 = List.map (fun l -> List.nth l 0) m1;;
 let generateEmptyList =
   fun m1 -> match m1 with 
       [] -> []
-    | h -> List.map (fun x-> []) h
-    | h::t -> List.map (fun x -> []) h
+    | h::t -> List.map (fun x -> []) (List.hd m1)
 
 
 let (transpose : matrix -> matrix) =
   fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) (generateEmptyList m) m);;
+
 
 
 
@@ -100,7 +100,7 @@ let second_Last_Elem l =
 
 
                                                                       
-
+(*helper function for execute*)
 let rec executeHelper1 (*(executeHelper1 : instr list -> float list -> float)*)= 
   fun insnLst stack -> match insnLst with 
       [] -> List.hd stack 
@@ -122,6 +122,7 @@ let rec executeHelper1 (*(executeHelper1 : instr list -> float list -> float)*)=
                     else 
                       -1.
 
+(*2a Execute Function *)
 let (execute : instr list -> float) =
   fun l -> match l with 
       [] -> 0.
