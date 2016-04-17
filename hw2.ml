@@ -48,13 +48,6 @@ let generateEmptyList =
     | h::t -> List.map (fun x -> []) h
 
 
-let previous = [];;
-let now = v1;;
-let v5 = List.map (fun x -> previous@[x] ) now;;
-(*let mm = List.fold_left (fun row lastPartMatrix -> 
-    List.map (fun x -> List.map (fun y -> x@[y]) row) lastPartMatrix@x row) [[];[];[]] v5;;*)
-
-let testing = List.map2 (fun x y -> x@[y]) v5 v2;;
 let (transpose : matrix -> matrix) =
   fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) (generateEmptyList m) m);;
 
@@ -62,15 +55,10 @@ let (transpose : matrix -> matrix) =
 (*List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m;;
 *)
 
-
-
-
-
-
 (* Implement Transpose First! *)
-(* 
+ (*)
 let (mmult : matrix -> matrix -> matrix) =
-  fun m1 m2 -> List.map2 vmult m1 m2;;
+  fun m1 m2 ->  List.map2 (fun m1 m2-> List.map (fun row m2 -> (List.map (fun row2 -> dotprod row1 row2) m2 )) m1)  m1 transpose m2;;
 *)
 (* Multiply row by row where m1 * tranpose m2 to build row by row of resultant vector *)
      
@@ -101,15 +89,58 @@ let rec (evalExp : exp -> float) =
     | (BinOp(l1, op1, r1), Num(v2)) -> evalExp (BinOp(Num(evalExp l), op, r))
 
 
-(*)
+
 (* a type for stack instructions *)	  
 type instr = Push of float | Swap | Calculate of op
 
 
+let remove_last lst = 
+    List.rev (List.tl (List.rev lst))
+let remove_last_two lst = 
+    remove_last (remove_last lst) 
+let last_Element l =
+    List.nth l (List.length l -1)
+let second_Last_Elem l = 
+    List.nth l (List.length l -2)
 
-let (execute : instr list -> float) 
-  raise ImplementMe
+
+
+(* for executeHelper assume the insn passed along is no longer in list! *)
+let rec (executeHelper: instr list -> instr -> float) = 
+    fun lst insnType -> match insnType with
+      Swap -> let last = last_Element lst in 
+                  let secLast = second_Last_Elem lst in 
+                    let twoElementsGone = remove_last(remove_last lst) in 
+                        executeHelper (twoElementsGone@[last]) secLast  
+    | Calculate(operator) -> let rOp = last_Element lst in 
+                                let lOp = second_Last_Elem lst in 
+                                  match (rOp, lOp) with 
+                                  (Push(v1), Push(v2))  -> 5. (*executeHelper Push(simpleOp (BinOp(Num(v1), operator, Num(v2))))*)
+                                | _ -> 5.   
+(*
+let rec (execute : instr list -> float) = 
+  fun l -> match l with
+    [] -> 0.
+  | h::t -> let last = List.tl l in 
+             executeHelper (remove_last l) last 
 *)
+
+
+
+let (execute : instr list -> float) =
+  fun l -> if (List.length l = 1) then 
+            match (List.hd l) with 
+              Push(v1) -> v1 
+            | _ -> 5.
+          else  
+              match l with 
+                [] -> 0.       
+              | h::t -> let lastInsn = List.nth l (List.length l -1) in  
+                executeHelper (remove_last l) lastInsn
+
+
+
+let test1 = [Push 1.;Push 2.; Swap];;
 
 (*      
 let (compile : exp -> instr list) =
