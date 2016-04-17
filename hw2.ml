@@ -17,7 +17,7 @@ let v3 = [7.;8.;9.];;
 let m1 = [v1;v2;v3];;
 let m2 = [v3;v2;v1];;
 let m3 = [v1;v2];;
-
+let m4 = [v1]
 (*Convert rows to columns *)
 
 let (mplus : matrix -> matrix -> matrix) =
@@ -45,13 +45,11 @@ let (transpose : matrix -> matrix) =
   fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) (generateEmptyList m) m);;
 
 
-
-
-(* Implement Transpose First! *)
- (*)
+ 
 let (mmult : matrix -> matrix -> matrix) =
-  fun m1 m2 ->  List.map2 (fun m1 m2-> List.map (fun row m2 -> (List.map (fun row2 -> dotprod row1 row2) m2 )) m1)  m1 transpose m2;;
-*)
+  fun m1 m2 -> let m22 = transpose m2 in 
+    List.map (fun m1row -> (List.map(fun m2row -> dotprod m1row m2row) m22)) m1
+
 (* Multiply row by row where m1 * tranpose m2 to build row by row of resultant vector *)
 
 
