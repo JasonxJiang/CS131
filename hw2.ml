@@ -11,8 +11,6 @@ type matrix = vector list
 let (vplus : vector -> vector -> vector) =
   fun v1 v2 -> List.map2 (+.) v1 v2;; 
 
-
-
 let v1 = [1.;2.;3.];;
 let v2 = [4.;5.;6.];;
 let v3 = [7.;8.;9.];;
@@ -22,12 +20,8 @@ let m3 = [v1;v2];;
 
 (*Convert rows to columns *)
 
-
-
 let (mplus : matrix -> matrix -> matrix) =
   fun m1 m2 -> List.map2 vplus m1 m2
-
-
 
 (* vmult is a helper function for dotprod *)
 
@@ -51,9 +45,7 @@ let generateEmptyList =
 let (transpose : matrix -> matrix) =
   fun m -> List.map (fun l -> List.rev l) (List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) (generateEmptyList m) m);;
 
-  (* save this for later working but reversed *)
-(*List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m;;
-*)
+
 
 (* Implement Transpose First! *)
  (*)
@@ -153,35 +145,60 @@ let rec (treeToList : btree -> instr list) =
 
 let test = BinOp(BinOp(Num 1.0, Plus, Num 2.0), Times, Num 3.0);;
 
-type tree = Leaf1 | Node1 of int * tree * tree
-
-let rec in_order = function
-  | Leaf1 -> []
-  | Node1(i,l,r) -> in_order l @ (i :: in_order r);;
-
-let rec preorder = function
-  | Leaf1 -> []
-  | Node1(x, l, r) -> x::preorder l @ preorder r
-
-  let rec postorder = function
-  | Leaf1 -> []
-  | Node1(x, l, r) -> postorder l @ postorder r @ [x]
-
-let tree1 = Node1(5, Node1(3,Node1(1,Leaf1,Leaf1),Leaf1) ,Node1(8,Node1(6,Leaf1,Node1(7,Leaf1,Leaf1)),Leaf1));;
-
 let rec (compile : exp -> instr list) =
   fun input -> match input with 
       Num(v) -> [Push(v)]
     | BinOp(l, op, r) -> let treeInput = expToTree input in
                           treeToList treeInput
 
+let compileResult = compile test;;
 
-(*
+let rec (decompileHelper : instr list -> exp list -> exp) =
+  fun insnLst stack -> match insnLst with 
+    [] -> List.hd stack 
+  | h::t -> match h with 
+      Push(v) -> decompileHelper t (stack@[Num(v)])
+    | Calculate(op) -> let rOp = last_Element stack in 
+                          let lOp = second_Last_Elem stack in 
+                            decompileHelper t ((remove_last_two stack)@[BinOp(lOp,op,rOp)])
+    | Swap -> if (List.length stack >1) then 
+                  let rOp = last_Element stack in 
+                    let lOp = second_Last_Elem stack in 
+                      decompileHelper t ((remove_last_two stack)@[rOp]@[lOp])
+              else 
+                Num(-1.)
+
+                          
 let (decompile : instr list -> exp) =
-  raise ImplementMe
+  fun lst -> match lst with 
+      [] -> Num(-1.)
+    | h::t -> decompileHelper lst [] 
 
+let rec countSize (*(countSize: instr list -> int -> list float -> int)*) = 
+  fun lst maxSize stack -> match lst with 
+      [] -> maxSize
+    | h::t -> match h with 
+        Push(v) -> let addPush = (stack@[v]) in
+                    let currSize = List.length addPush in
+                      if (currSize > maxSize) then 
+                        countSize t (currSize) addPush 
+                      else countSize t maxSize addPush 
+      | Calculate(op) -> if (List.length stack >1) then 
+                          let rOp = last_Element stack in 
+                            let lOp = second_Last_Elem stack in 
+                              let simpleResult = simpleOp (BinOp(Num(lOp),op,Num(rOp))) in
+                                let newStack = (remove_last_two stack)@[simpleResult] in
+                                  if (List.length newStack > maxSize) then 
+                                   countSize t (List.length newStack) newStack 
+                                  else 
+                                    countSize t maxSize newStack
+                          else 
+                            -1
+let test1 = BinOp(Num(1.), Minus, BinOp(Num(2.),Plus,Num(3.)));;       
 (* EXTRA CREDIT *)        
 let (compileOpt : exp -> (instr list * int)) =
-  raise ImplementMe
-*)
+  fun input -> let leftCompile = compile input in
+                let maxSize = countSize leftCompile 0 [] in 
+                  (leftCompile, maxSize)
+
 
