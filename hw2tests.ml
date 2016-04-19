@@ -1,13 +1,9 @@
 (*Testing Cases *)
-let rec rightTreetoList = 
-  fun tree -> match tree with 
-    Leaf(v) -> [Push(v)]
-   | Node(ltree, op, rtree) -> match op with 
-        Minus -> ((rightTreetoList ltree)@(rightTreetoList rtree )@[Swap]@[Calculate(op)])
-      | Divide -> ((rightTreetoList ltree)@(rightTreetoList rtree )@[Swap]@[Calculate(op)])
-      | _ ->  ((rightTreetoList ltree)@(rightTreetoList rtree )@[Calculate(op)])  
 
-(*Matrices *)
+# use "hw2.ml";;
+# use "hw2tests1.ml";;
+# use "other_test.ml";;
+(*Matrice s *)
 
 let v1 = [1.;2.;3.];;
 let v2 = [4.;5.;6.];;
@@ -117,3 +113,17 @@ let () = assert (decompile compileExp4 = exp4)
 let () = assert (decompile compileExp5 = exp5)
 let () = assert (decompile insnSet2 = exp6)
 let () = assert (decompile insnSet3 = exp7)
+
+(*)
+let rec (rightTreetoList : btree -> instr list -> instr list list -> instr list * instr list list) = 
+  fun tree buildingList allLists -> match tree with 
+    Leaf(v) -> ([Push(v)], allLists)
+   | Node(ltree, op, rtree) -> let (lbuildList, lAllLists) = (rightTreetoList ltree buildingList allLists) in 
+                                let (rbuildList, rAllLists) = (rightTreetoList rtree buildingList allLists) in 
+                                  let swapIncluded = (lbuildList@rbuildList@[Swap]@[Calculate(op)]) in
+                                    let swapExcluded = lbuildList@rbuildList@[Calculate(op)] in 
+                                      match op with 
+                                        Minus -> (buildingList, allLists@swapIncluded@swapExcluded)
+                                      | Divide -> (buildingList, allLists@swapIncluded@swapExcluded)
+                                      | _ ->  (buildingList, allLists@swapExcluded)
+*)

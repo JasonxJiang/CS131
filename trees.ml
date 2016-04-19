@@ -14,6 +14,14 @@ let rec preorder = function
 
 let tree1 = Node1(5, Node1(3,Node1(1,Leaf1,Leaf1),Leaf1) ,Node1(8,Node1(6,Leaf1,Node1(7,Leaf1,Leaf1)),Leaf1));;
 
+let rec rightTreetoList = 
+  fun tree -> match tree with 
+    Leaf(v) -> [Push(v)]
+   | Node(ltree, op, rtree) -> match op with 
+        Minus -> ((rightTreetoList ltree)@(rightTreetoList rtree )@[Swap]@[Calculate(op)])
+      | Divide -> ((rightTreetoList ltree)@(rightTreetoList rtree )@[Swap]@[Calculate(op)])
+      | _ ->  ((rightTreetoList ltree)@(rightTreetoList rtree )@[Calculate(op)])  
+
   (* save this for later working but reversed *)
 (*List.fold_left (fun row firstPartMatrix -> List.map2 (fun x y-> x::y) firstPartMatrix row) [[];[];[]] m;;
 *)

@@ -1,0 +1,80 @@
+int: +,-,>
+
+bool: =,!=,&&,||, if, ...
+
+int -> bool : a set of all functions that, given an arg of type int, produce a result of type boolic vs dynamic typechecking 
+
+1. Static vs. dynamic typechecking 
+
+Static typechecking: Every program expression is given a type at compilee time. 
+
+- c, C++, Java, Ocaml, c#
+
+Dynamic typechecking: types are not explicit in the program. At run time, during evaluation, all arguments to primitive operations are checked to be of the right type on demand. 
+ - Python, Lisp, Scheme, PHP,
+
+Advantages of static typechecking:
+
+* early error detection 
+	"type errors" are caught at compile time 
+	-invoking an operation with args of the wrong type
+	these errors cannot occur at run time 
+
+* program documentation 
+ types are a checked form of comments 
+
+
+ * enforce user-defined abstractions 
+  - classes/data types in OCaml 
+
+ * efficiency 
+  - no run-time typechecking 
+
+Disadvantages of static typechecking: 
+
+* some loss of flexibility 
+	- your code has to be checkable by the static type system 
+	 - no heterogeneous lists 
+	  - all list elements have the same type 
+
+2. Strong vs weak typechecking 
+ - sound vs. unsound typechecking 
+
+* Strongly type: The typechecker is correct.
+ - there is no possibility of type errors at run time 
+ - you can never get into an undefined state at run time 
+
+* Weakly typed: The language is borken.
+ - program can typecheck but still have type errors at run time 
+ - at which point, you are in an undefined state  
+
+C and C++ are the *only* weakly type languages 
+ - unchecked type casts 
+ - buffer overflow 
+  - out-of-bounds array access 
+ - dangling pointers 
+ - uninitialized variables 
+
+All other languages are *memory safe* through run-time checking:
+- arrays carry around their length 
+ - every array access is preceded by a bounds check 
+- no manual access to pointers 
+ - allocation is implicit 
+ - deallocation is done by the garbage collector 
+
+Static/Strong: Java, Ocaml,C# 
+Dynamic/Strong: Python, PHP, Lisp 
+
+Static/Weak: C and C++
+dyamic/Weak: ???
+
+3. Static typechecking vs Static type inference 
+ Typechecking requires program annotations on all variables 
+ - formal parameters, local variables 
+
+ Type inference infers types with no annotations 
+
+
+
+
+
