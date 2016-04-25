@@ -56,9 +56,9 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
       (* an integer constant evaluates to itself *)
     IntConst(i) -> IntVal(i)
     | BoolConst(b) -> BoolVal(b)
-    | Var(s) ->  (Env.lookup s env)
-    			(*try (Env.lookup s env) with 
-    				NotBound -> raise (DynamicTypeError "dynamic type error")*)
+    | Var(s) ->  (*(Env.lookup s env)*)
+    			(try (Env.lookup s env) with 
+    				Env.NotBound -> raise (DynamicTypeError "dynamic type error"))
     | BinOp(e1, op, e2) -> 
     	(let e1' = evalExpr e1 env in 
     		let e2' = evalExpr e2 env in 
@@ -89,7 +89,16 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
 	| Match(e, l) -> 
     	let evalE = evalExpr e env in 
     		IntVal(69)
-    | FunctionCall(e1, e2) -> raise (ImplementMe "FunctionCall not implemented")
+    (*| FunctionCall(e1, e2) -> 
+    			(let funcVal = evalExpr e1 env in 
+    					match evalExpr e1 env with 
+    						FunctionVal(func_s,func_pat,func_expr,func_env) -> 
+    							(let args = evalExpr e2 in 
+    								match args with 
+    									) *)
+(*Match e2 with different types of moexpr and then bind them in an envrionment correclty
+Or match with movalue*)
+
     		(*let rec aux pat val -> patMatch *)(* goal is if evalE matches a pattern in the list then evalExpr the accompanying moexpr *)
 
 
