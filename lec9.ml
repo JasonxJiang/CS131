@@ -26,3 +26,27 @@ let rec sumLstTR l =
 		| h::t-> helper (acc+h) t 
 	in helper 0 l 
 
+
+(*Midterm Exam
+
+Closed everything 
+M/C 
+Short Answer 
+Coding 
+
+No Tail Recursion 
+OCaml
+-Recursion 
+-pattern matching 
+-higher-order functions 
+ -map, filter, fold_right/left
+-exceptions
+-datatypes 
+
+Concepts:
+ - static vs. dynamic scoping 
+ - static vs dynamic typechecking  
+ - strong vs. weak typechecking 
+ - parametric polymoprhism vs. static overloading 
+
+*)

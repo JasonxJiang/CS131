@@ -89,13 +89,15 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
 	| Match(e, l) -> 
     	let evalE = evalExpr e env in 
     		IntVal(69)
-    (*| FunctionCall(e1, e2) -> 
+    | FunctionCall(e1, e2) -> 
     			(let funcVal = evalExpr e1 env in 
-    					match evalExpr e1 env with 
-    						FunctionVal(func_s,func_pat,func_expr,func_env) -> 
-    							(let args = evalExpr e2 in 
-    								match args with 
-    									) *)
+    					match funcVal with 
+    					FunctionVal(func_s,func_pat,func_expr,func_env) -> 
+    							(let args = evalExpr e2 env in 
+    								let new_fun_env = patMatch func_pat args in 
+    									evalExpr func_expr new_fun_env))
+    			| _ -> IntVal(69) 
+
 (*Match e2 with different types of moexpr and then bind them in an envrionment correclty
 Or match with movalue*)
 
