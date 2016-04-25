@@ -49,12 +49,16 @@ let rec patMatch (pat:mopat) (value:movalue) : moenv =
    trying to add a boolean to an integer) which prevents evaluation
    from continuing.
 *)
+
+
 let rec evalExpr (e:moexpr) (env:moenv) : movalue =
   match e with
       (* an integer constant evaluates to itself *)
     IntConst(i) -> IntVal(i)
     | BoolConst(b) -> BoolVal(b)
-    | Var(s) -> Env.lookup s env
+    | Var(s) ->  (Env.lookup s env)
+    			(*try (Env.lookup s env) with 
+    				NotBound -> raise (DynamicTypeError "dynamic type error")*)
     | BinOp(e1, op, e2) -> 
     	(let e1' = evalExpr e1 env in 
     		let e2' = evalExpr e2 env in 
@@ -66,28 +70,27 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
     										| Eq -> (BoolVal(i1=i2)) 
     										| Gt -> (BoolVal(i1>i2)))
     				| (_,_) -> raise (DynamicTypeError "can only perform BinOp operations on Ints!")) 
-    
     | Negate(e0) -> 
-    	let v0 = evalExpr e0 env in 
+    	(let v0 = evalExpr e0 env in 
     	(match v0 with 
     		IntVal i -> IntVal(-i)
-    	| _ -> raise (DynamicTypeError "can only negate integers"))
+    	| _ -> raise (DynamicTypeError "can only negate integers")))
     | If(c,if_clause,then_clause) ->
-    	 let v0 = evalExpr c env in 
+    	 (let v0 = evalExpr c env in 
     	 (match v0 with 
     	 	BoolVal(b) -> if b then (evalExpr if_clause env) else (evalExpr then_clause env)
-    	 | _ -> raise(DynamicTypeError "cannot evaulate a non boolean value!"))
+    	 | _ -> raise(DynamicTypeError "cannot evaulate a non boolean value!")))
     | Function(pat, e) ->  FunctionVal(None, pat, e, env)
     | Tuple(l) -> TupleVal(List.map(fun elem -> evalExpr elem env) l)  
-    | FunctionCall(e1, e2) -> raise (ImplementMe "FunctionCall not implemented")
-    (*| Data(s, op) -> 
-    	(match op with
-    		Some(val) -> (DataVal(s, Some((evalExpr val env)))
-    	| None -> (DataVal(s,None)) *)
-    (*| Match(e, l) -> 
+    | Data(s,expr_op) -> (match expr_op with 
+    						None -> DataVal(s, None)
+    					| Some(something) -> let value = evalExpr something env in 
+    						DataVal(s,Some(value)))
+	| Match(e, l) -> 
     	let evalE = evalExpr e env in 
-    		let rec aux pat val -> patMatch *)(* goal is if evalE matches a pattern in the list then evalExpr the accompanying moexpr *)
-    | _ -> raise (ImplementMe "expression evaluation not implemented")
+    		IntVal(69)
+    | FunctionCall(e1, e2) -> raise (ImplementMe "FunctionCall not implemented")
+    		(*let rec aux pat val -> patMatch *)(* goal is if evalE matches a pattern in the list then evalExpr the accompanying moexpr *)
 
 
 (* Evaluate a declaration in the given environment.  Evaluation
@@ -103,10 +106,7 @@ let rec evalDecl (d:modecl) (env:moenv) : moresult =
     (*| LetRec(s, rec_expr) -> let binded_val = (evalExpr rec_expr env) in 
     							match binded_val with 
     								FunctionVal(string_op, pat, expr, envir) -> *)
-    | _ -> raise (ImplementMe "Letrec not done") 
-(* 
-you need the current env 
-Take curr env and add the variable in previous 
-Merge the environments first 
-Then eval the expression 
-*)
+   (*) | LetRec(s, rec_expr) -> let binded_val = (evalExpr rec_expr env) in 
+    							(match binded_val with 
+    							FunctionVal(binded_val_s,pat,expr, f_env) -> FunctionalVal(s,pat,expr, f_env)
+    						| _ -> IntVal(-1) )*)
