@@ -103,10 +103,9 @@ let rec evalDecl (d:modecl) (env:moenv) : moresult =
       Expr(e) -> (None, evalExpr e env)
     | Let(s, let_expr) -> let binded_val = (evalExpr let_expr env) in
                      		    (Some(s), binded_val)
-    (*| LetRec(s, rec_expr) -> let binded_val = (evalExpr rec_expr env) in 
+    | LetRec(s, rec_expr) -> let binded_val = (evalExpr rec_expr env) in 
     							match binded_val with 
-    								FunctionVal(string_op, pat, expr, envir) -> *)
-   (*) | LetRec(s, rec_expr) -> let binded_val = (evalExpr rec_expr env) in 
-    							(match binded_val with 
-    							FunctionVal(binded_val_s,pat,expr, f_env) -> FunctionalVal(s,pat,expr, f_env)
-    						| _ -> IntVal(-1) )*)
+    								FunctionVal(bind_s, pat, bind_e, bind_env)  -> let bind_moval = (FunctionVal(Some(s), pat, bind_e, bind_env)) in
+    								(Some(s), bind_moval)
+    							    				
+
