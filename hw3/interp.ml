@@ -94,14 +94,13 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
     					match funcVal with 
     					FunctionVal(func_s,func_pat,func_expr,func_env) -> 
     							(let args = evalExpr e2 env in 
-    								let new_fun_env = patMatch func_pat args in 
+    								let new_fun_env = Env.combine_envs func_env (patMatch func_pat args) in 
                         (* BACKUP WORKING LINE evalExpr func_expr new_fun_env*)
                         match func_s with 
                           None -> evalExpr func_expr new_fun_env
                           | Some(rec_fun_name) -> let new_fun_env' = (Env.add_binding rec_fun_name (evalExpr e1 env) new_fun_env) in
                             evalExpr func_expr new_fun_env'
     									))
-    			| _ -> IntVal(69) 
     		(*let rec aux pat val -> patMatch *)(* goal is if evalE matches a pattern in the list then evalExpr the accompanying moexpr *)
 
 
