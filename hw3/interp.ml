@@ -58,7 +58,7 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
     | BoolConst(b) -> BoolVal(b)
     | Var(s) ->  (*(Env.lookup s env)*)
     			(try (Env.lookup s env) with 
-    				Env.NotBound -> raise (DynamicTypeError "dynamic type error"))
+    				Env.NotBound -> raise (DynamicTypeError ("dynamic type error failure on variable:"^s)))
     | BinOp(e1, op, e2) -> 
     	(let e1' = evalExpr e1 env in 
     		let e2' = evalExpr e2 env in 
@@ -95,12 +95,13 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
     					FunctionVal(func_s,func_pat,func_expr,func_env) -> 
     							(let args = evalExpr e2 env in 
     								let new_fun_env = patMatch func_pat args in 
-    									evalExpr func_expr new_fun_env))
+                        (* BACKUP WORKING LINE evalExpr func_expr new_fun_env*)
+                        match func_s with 
+                          None -> evalExpr func_expr new_fun_env
+                          | Some(rec_fun_name) -> let new_fun_env' = (Env.add_binding rec_fun_name (evalExpr e1 env) new_fun_env) in
+                            evalExpr func_expr new_fun_env'
+    									))
     			| _ -> IntVal(69) 
-
-(*Match e2 with different types of moexpr and then bind them in an envrionment correclty
-Or match with movalue*)
-
     		(*let rec aux pat val -> patMatch *)(* goal is if evalE matches a pattern in the list then evalExpr the accompanying moexpr *)
 
 
@@ -116,7 +117,7 @@ let rec evalDecl (d:modecl) (env:moenv) : moresult =
                      		    (Some(s), binded_val)
     | LetRec(s, rec_expr) -> let binded_val = (evalExpr rec_expr env) in 
     							match binded_val with 
-    								FunctionVal(bind_s, pat, bind_e, bind_env)  -> let bind_moval = (FunctionVal(Some(s), pat, bind_e, bind_env)) in
+    								FunctionVal(bind_s, pat, bind_e, bind_env) -> let bind_moval = (FunctionVal(Some(s), pat, bind_e, bind_env)) in
     								(Some(s), bind_moval)
     							    				
 
