@@ -38,7 +38,7 @@ let tests = [
     ("Node(Leaf,1,Leaf)","Node (Leaf, 1, Leaf)"); (* Creating Data values *)
     ("-100","-100");                        (* Evaluating Negate'd IntConst *)
     (* Creating a match function and testing *)
-    ("let m = function a -> function b -> match (a,b) with (true,1) -> 1 | (Leaf(a,b),_) -> a + b | (_,false) -> 2", "val m = <fun>");
+    ("let m = function a -> function b -> match (a,b) with (true,1) -> 1 | (_,false) -> 2 | (Leaf(a,b),_) -> a + b ", "val m = <fun>");
     ("m true 1","1");                       (* Generic tests *)
     ("m (Leaf(5,6)) true", "11");
     ("m 1 false","2");
@@ -74,7 +74,7 @@ let tests = [
     (*Ryan TestCases*)
     ("match (3, 3) with (x,y) -> x + y","6");
     ("match (3, 3) with (x,y) -> x + y","6");
-    (*("match true with x -> if x then 6 else 3","6");*)
+    ("match true with x -> if x then 6 else 3","6");
     ("match (3, 3) with (x,y) -> x + y","6");
     ("match false with _ -> 123", "123");
     ("match None with None -> 0 | Some(x) -> x","0");
@@ -100,6 +100,41 @@ let tests = [
     ("let f = function (x,y) -> x + y", "val f = <fun>");
     ("f (1,1)", "2");
     ("f (true,1)", "dynamic type error");
+    ("-(1-2)", "1");
+    ("let f = function x -> x", "val f = <fun>");
+    ("let f2 = function y -> x", "val f2 = <fun>");
+    
+    (*Alex's TestCases*)
+    ("f 100", "100");
+    ("f2 100", "34");
+    (*("let inc = function x -> x+1", "val inc = <fun>");*)
+    ("inc 2", "3");
+    ("let tupAdd = function (x,y) -> x+y","val tupAdd = <fun>");
+    ("tupAdd (1,2)","3");
+    ("let conjFunct  = function ((x,y),b) -> if ((x+y)=b) then true else false","val conjFunct = <fun>");
+    ("conjFunct ((1,1),2)","true");
+    ("conjFunct ((1,1),1)","false");
+    ("let addTwoArgs = (function x -> (function y -> x+y));;", "val addTwoArgs = <fun>");
+    ("addTwoArgs 124 412", "536");
+    ("addTwoArgs false 412", "dynamic type error");
+    ("let matchThis = 7","val matchThis = 7");
+    ("match matchThis with 4 -> false | 3 -> 3","match failure");
+    ("match matchThis with 4 -> false | 3 -> 3 | _ -> true","true");
+    ("let matchers = function x -> (function y -> match x with true -> y*y | 2 -> y*2 | -1 -> y-1 | _ -> y)","val matchers = <fun>");
+    ("matchers true 7","49");
+    ("let rec double i = i*2","val double = <fun>");
+    ("let rec twice f = function x -> f(f(x))","val twice = <fun>");
+    ("(twice double) 10","40");
+    ("let rec fact x = match x with 0 -> 1 | x -> x * (fact (x-1))","val fact = <fun>");
+    ("fact 10","3628800");
+    ("let tree = function ojb -> match ojb with Leaf -> 0 | Node(x) -> x | _ -> -1","val tree = <fun>");
+    ("tree Leaf","0");
+    ("tree (Node(10))","10");
+    ("let tupAdd = function tup -> match tup with (x,y) -> x+y | _ -> -1","val tupAdd = <fun>");
+    ("tupAdd (5,12)","17");
+    ("let rec sumtree n = match n with Leaf -> 0 | Node(left,val,right) -> (sumtree left) + val + (sumtree right) | _ -> false","val sumtree = <fun>");
+    ("let tree = Node(Node(Leaf,7,Leaf),1,Leaf)","val tree = Node (Node (Leaf, 7, Leaf), 1, Leaf)");
+    ("sumtree tree","8");
     
     ]
 

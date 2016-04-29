@@ -1,9 +1,12 @@
 (* Name: Jason Jiang
 
-   UID:
+   UID: 604409327 
 
-   Others With Whom I Discussed Things:
-
+  Others With Whom I Discussed Things:
+  Ryan Peterman (Shared testcases)
+  Alex Fong (Shared testcases)
+  Max Chern (Shared testcases)
+  Prashanth Swami (Shared testcases and discussed implementation of assignment)
    Other Resources I Consulted:
    
 *)
