@@ -39,8 +39,16 @@ let rec patMatch (pat:mopat) (value:movalue) : moenv =
     | (VarPat(s), _)  -> Env.add_binding s value (Env.empty_env())  
     | (TuplePat(patL), TupleVal(valL)) -> let envs_list = (List.map2 patMatch patL valL) in
     	List.fold_left (fun currEnv previousEnvs -> (Env.combine_envs previousEnvs currEnv)) (Env.empty_env()) envs_list
- 	| (DataPat(pats, patopt), DataVal(vals, valopt)) -> (Env.add_binding pats (DataVal(vals,valopt)) (Env.empty_env()))  (*Could be wrong *)
-    (*| _ -> raise (ImplementMe "pattern matching not implemented")*)
+ 	  | (DataPat(pats, patopt), DataVal(vals, valopt)) -> (let env_data_name_bound = 
+    (Env.add_binding pats (DataVal(vals,valopt)) (Env.empty_env())) in 
+      match patopt with 
+      None -> env_data_name_bound
+      | Some(inner_pat_val) -> (match valopt with 
+                Some(inner_val_val) -> patMatch inner_pat_val inner_val_val (*Env.combine_envs env_data_name_bound (patMatch inner_pat_val inner_val_val) *)
+                | _ -> env_data_name_bound) 
+    )
+     (*Could be wrong *)
+    | _ -> raise (ImplementMe "pattern matching not implemented")
 
     
 (* Evaluate an expression in the given environment and return the
@@ -52,24 +60,42 @@ let rec patMatch (pat:mopat) (value:movalue) : moenv =
 
 (*let rec aux pat val -> patMatch *)
 (* goal is if evalE matches a pattern in the list then evalExpr the accompanying moexpr *)
-
+(*let rec tupleHelper tupValL tupPatL = 
+  if (List.length tupValL != List.length tupPatL) then false 
+  else List.map2 (fun ) *)
+let rec helper (pat:mopat) (value:movalue) : bool = 
+  match (pat,value) with 
+    (IntPat(i), IntVal(j)) when i =j -> true
+    | (BoolPat(i), BoolVal(j)) when i=j -> true
+    | (WildcardPat, _) -> true 
+    | (VarPat(s), _)  -> true
+    | (TuplePat(patL), TupleVal(valL)) -> let bool_list = (List.map2 helper patL valL) in 
+                                          List.fold_left (fun elem acc -> elem&&acc) true bool_list
+    | (DataPat(pats, patopt), DataVal(vals, valopt)) -> true
+    | _ -> false 
 
 let rec matchHelper (matchVal:movalue) (patList: (mopat*moexpr) list) : (mopat *moexpr) =
   match patList with 
-    [] -> raise (MatchFailure)
+    [] -> raise MatchFailure
     | (pat, expr)::t -> match matchVal with 
       IntVal(i) -> (match pat with 
                   IntPat(i') ->if (i = i') then (pat,expr) else matchHelper matchVal t
-                  | WildcardPat -> (pat,expr))
+                  | WildcardPat -> (pat,expr)
+                  | _ -> raise MatchFailure)
     | BoolVal(b) -> (match pat with 
                   BoolPat(b') -> if (b=b') then (pat,expr) else matchHelper matchVal t
-                  | WildcardPat -> (pat,expr))
+                  | WildcardPat -> (pat,expr)
+                  | _ -> raise MatchFailure) 
     | TupleVal(l) -> (match pat with 
-                    TuplePat(l') -> if ((List.length l) = (List.length l')) then (pat,expr) else matchHelper matchVal t
-                  | WildcardPat -> (pat,expr))
+                    TuplePat(l') -> let bool_list = (List.map2 helper l' l) in 
+                                      let perfectMatch = List.fold_left (fun elem acc -> elem&&acc) true bool_list in 
+                                          if perfectMatch then (pat,expr) else matchHelper matchVal t
+                  | WildcardPat -> (pat,expr)
+                  | _ -> raise MatchFailure)
     | DataVal(s, valOp) -> (match pat with 
                             DataPat(s', valOp') -> if (s=s') then (pat,expr) else matchHelper matchVal t
-                            | WildcardPat -> (pat,expr) )
+                            | WildcardPat -> (pat,expr) 
+                            | _ -> raise MatchFailure)
     | _ -> raise MatchFailure 
 
 let rec evalExpr (e:moexpr) (env:moenv) : movalue =
@@ -79,7 +105,7 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
     | BoolConst(b) -> BoolVal(b)
     | Var(s) ->  (*(Env.lookup s env)*)
     			(try (Env.lookup s env) with 
-    				Env.NotBound -> raise (DynamicTypeError ("dynamic type error")))
+    				Env.NotBound -> raise (DynamicTypeError ("dynamic type error env bad")))
     | BinOp(e1, op, e2) -> 
     	(let e1' = evalExpr e1 env in 
     		let e2' = evalExpr e2 env in 
@@ -90,17 +116,17 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
     										| Times -> (IntVal(i1*i2))
     										| Eq -> (BoolVal(i1=i2)) 
     										| Gt -> (BoolVal(i1>i2)))
-    				| (_,_) -> raise (DynamicTypeError "can only perform BinOp operations on Ints!")) 
+    				| (_,_) -> raise (DynamicTypeError "dynamic type error 8")) 
     | Negate(e0) -> 
     	(let v0 = evalExpr e0 env in 
     	(match v0 with 
     		IntVal i -> IntVal(-i)
-    	| _ -> raise (DynamicTypeError "can only negate integers")))
+    	| _ -> raise (DynamicTypeError "dynamic type error 7")))
     | If(c,if_clause,then_clause) ->
     	 (let v0 = evalExpr c env in 
     	 (match v0 with 
     	 	BoolVal(b) -> if b then (evalExpr if_clause env) else (evalExpr then_clause env)
-    	 | _ -> raise(DynamicTypeError "cannot evaulate a non boolean value!")))
+    	 | _ -> raise(DynamicTypeError "dynamic type error 6")))
     | Function(pat, e) ->  FunctionVal(None, pat, e, env)
     | Tuple(l) -> TupleVal(List.map(fun elem -> evalExpr elem env) l)  
     | Data(s,expr_op) -> (match expr_op with 
@@ -125,9 +151,9 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
                           | Some(rec_fun_name) -> let new_fun_env' = (Env.add_binding rec_fun_name (evalExpr e1 env) new_fun_env) in
                             evalExpr func_expr new_fun_env'
     							)
-              | _ -> raise(DynamicTypeError "dynamic type error")
+              | _ -> raise(DynamicTypeError "dynamic type error 3")
             )
-    | _ -> raise (DynamicTypeError "dynamic type error")
+    | _ -> raise (DynamicTypeError "dynamic type error 4")
     		
 
 

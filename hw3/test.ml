@@ -40,11 +40,15 @@ let tests = [
     (* Creating a match function and testing *)
     ("let m = function a -> function b -> match (a,b) with (true,1) -> 1 | (Leaf(a,b),_) -> a + b | (_,false) -> 2", "val m = <fun>");
     ("m true 1","1");                       (* Generic tests *)
-    (*("m (Leaf(5,6)) true", "11");*)
+    ("m (Leaf(5,6)) true", "11");
     ("m 1 false","2");
     ("m Leaf false", "2");                  (* Confirming DataVal matching *)
-    (*("m 1 2", "match failure");             (* Confirming Match Failure when no expressions match *)
-     *)   (* Creating staged functions (anonymity) *)
+    ("m 1 2", "match failure");             (* Confirming Match Failure when no expressions match *)
+        
+    ("let rec test a = function b -> match (a,b) with (true,1) -> 1 | (_,false) -> 2", "val test = <fun>");
+    ("test Leaf false", "2");   
+    ("test true 1", "1"); 
+        (* Creating staged functions (anonymity) *)
     ("let k = function a -> function b -> a + b","val k = <fun>");
     ("let ks = k 1","val ks = <fun>");
     ("ks 4","5");                           (* Returned function must work *)
@@ -61,12 +65,42 @@ let tests = [
     ("(1+2) 3","dynamic type error");                       (* cannot invoke non-function *)
   
      (* Interesting cases *)
-    (*("let rec thePathFewTravel x = if x=0 then thePathFewTravel 0 else 1", "val thePathFewTravel = <fun>");
+    ("let rec thePathFewTravel x = if x=0 then thePathFewTravel 0 else 1", "val thePathFewTravel = <fun>");
     ("thePathFewTravel 1", "1");                            (* Emerson rolls infinitely in his grave. *)
     ("let phantomOfTheFunction = 100","val phantomOfTheFunction = 100");
     ("let phantomOfTheFunction = function x -> phantomOfTheFunction 1","val phantomOfTheFunction = <fun>");
     ("phantomOfTheFunction 2", "dynamic type error");       (* He lingers in the environment. *)
-    *)
+
+    (*Ryan TestCases*)
+    ("match (3, 3) with (x,y) -> x + y","6");
+    ("match (3, 3) with (x,y) -> x + y","6");
+    (*("match true with x -> if x then 6 else 3","6");*)
+    ("match (3, 3) with (x,y) -> x + y","6");
+    ("match false with _ -> 123", "123");
+    ("match None with None -> 0 | Some(x) -> x","0");
+    ("match Some(12) with None -> 0 | Some(x) -> x","12");
+    ("match None with 3 -> 0 | 123 -> 14","match failure");    
+    ("1 + 1","2");
+    ("2 * 2","4");
+    ("1 - 1","0");
+    ("true","true");
+    ("let x = 12", "val x = 12");
+    ("x","12");
+    ("-1","-1");
+    ("if 1>3 then 123 else 321","321");
+    ("let three = (function a -> (function b -> (function c -> (a + b + c))));;","val three = <fun>");
+    ("three 1 2 3", "6");
+    ("three true 2 3", "dynamic type error");
+    ("three 3 2 false", "dynamic type error");
+    ("if (3 + 2) then true else false", "dynamic type error");
+    ("-true", "dynamic type error");
+    ("2 + true", "dynamic type error");
+    ("notbound", "dynamic type error");
+    ("true=true", "dynamic type error");
+    ("let f = function (x,y) -> x + y", "val f = <fun>");
+    ("f (1,1)", "2");
+    ("f (true,1)", "dynamic type error");
+    
     ]
 
 (* The Test Harness
