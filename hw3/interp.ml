@@ -73,7 +73,10 @@ let rec helper (pat:mopat) (value:movalue) : bool =
     | (VarPat(s), _)  -> true
     | (TuplePat(patL), TupleVal(valL)) when (List.length patL = List.length valL) -> let bool_list = (List.map2 helper patL valL) in 
                                           List.fold_left (fun elem acc -> elem&&acc) true bool_list
-    | (DataPat(pats, patopt), DataVal(vals, valopt)) -> true
+    | (DataPat(pats, patopt), DataVal(vals, valopt)) when pats=vals->( match (patopt,valopt) with
+                                                      (None,None) -> true 
+                                                      | (Some(s),Some(s')) -> helper s s'
+                                                      | (_,_) -> false )  
     | _ -> false 
 
 let rec matchHelper (matchVal:movalue) (patList: (mopat*moexpr) list) : (mopat *moexpr) =

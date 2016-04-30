@@ -35,14 +35,14 @@ exception MatchFailure
 let rec patMatch (pat:mopat) (value:movalue) : moenv =
   match (pat, value) with
       (* an integer pattern matches an integer only when they are the same constant;
-	 no variables are declared in the pattern so the returned environment is empty *)
+   no variables are declared in the pattern so the returned environment is empty *)
       (IntPat(i), IntVal(j)) when i=j -> Env.empty_env()
     | (BoolPat(i), BoolVal(j)) when i=j -> Env.empty_env()
     | (WildcardPat, _) -> Env.empty_env()
     | (VarPat(s), _)  -> Env.add_binding s value (Env.empty_env())  
-    | (TuplePat(patL), TupleVal(valL)) -> let envs_list = (List.map2 patMatch patL valL) in
-    	List.fold_left (fun currEnv previousEnvs -> (Env.combine_envs previousEnvs currEnv)) (Env.empty_env()) envs_list
- 	  (*| (DataPat(pats, patopt), DataVal(vals, valopt)) -> 
+    | (TuplePat(patL), TupleVal(valL)) when (List.length patL) = (List.length valL)-> let envs_list = (List.map2 patMatch patL valL) in
+      List.fold_left (fun currEnv previousEnvs -> (Env.combine_envs previousEnvs currEnv)) (Env.empty_env()) envs_list
+    | (DataPat(pats, patopt), DataVal(vals, valopt)) -> 
       (*match patopt with 
         None -> (match valopt with 
           None -> Env.add_binding pats (DataVal(vals,valopt)) (Env.empty_env())
@@ -54,7 +54,7 @@ let rec patMatch (pat:mopat) (value:movalue) : moenv =
       | Some(inner_pat_val) -> (match valopt with 
                 Some(inner_val_val) -> Env.combine_envs env_data_name_bound (patMatch inner_pat_val inner_val_val) (*Env.combine_envs env_data_name_bound (patMatch inner_pat_val inner_val_val) *)
                 | _ -> env_data_name_bound) 
-    )*)
+    )
     | _ -> raise (ImplementMe "pattern matching not implemented")
 
     
@@ -102,7 +102,9 @@ let rec matchHelper (matchVal:movalue) (patList: (mopat*moexpr) list) (op:string
                                   (None,None) -> (pat,expr)
                                   | (Some(vals), Some(pats)) -> if (helper pats vals) then (pat,expr) else matchHelper matchVal t op
                                   | (_,_) -> matchHelper matchVal t op)
-                              | _ ->  matchHelper matchVal t op)))
+                              | _ ->  matchHelper matchVal t op)
+        | _ -> matchHelper matchVal t op )
+    )
                         
 
   (*match patList with 
@@ -143,7 +145,7 @@ let rec matchHelper (matchVal:movalue) (patList: (mopat*moexpr) list) (op:string
     WildcardPat
     TuplePat(l)
     DataPat(s,opt)*)
-
+(*)
 let rec evalExpr (e:moexpr) (env:moenv) : movalue =
   match e with
       (* an integer constant evaluates to itself *)
@@ -209,7 +211,74 @@ let rec evalExpr (e:moexpr) (env:moenv) : movalue =
               | _ -> raise(DynamicTypeError "dynamic type error 3")
             )
     | _ -> raise (DynamicTypeError "dynamic type error 4")
-    		
+*)
+
+let rec evalExpr (e:moexpr) (env:moenv) : movalue =
+  match e with
+      (* an integer constant evaluates to itself *)
+    IntConst(i) -> (IntVal(i))
+    | BoolConst(b) -> BoolVal(b)
+    | Var(s) ->  (*(Env.lookup s env)*)
+          (try (Env.lookup s env) with 
+            Env.NotBound -> raise (DynamicTypeError ("dynamic type error env bad")))
+    | BinOp(e1, op, e2) -> 
+      (let e1' = evalExpr e1 env in 
+        let e2' = evalExpr e2 env in 
+          match (e1', e2') with 
+            (IntVal(i1), IntVal(i2)) -> (match op with 
+                          Plus -> IntVal(i1 + i2)
+                        | Minus -> (IntVal(i1-i2))
+                        | Times -> (IntVal(i1*i2))
+                        | Eq -> (BoolVal(i1=i2)) 
+                        | Gt -> (BoolVal(i1>i2)))
+            | (_,_) -> raise (DynamicTypeError "dynamic type error 8")) 
+    | Negate(e0) -> 
+      (let v0 = evalExpr e0 env in 
+      (match v0 with 
+        IntVal i -> IntVal(-i)
+      | _ -> raise (DynamicTypeError "dynamic type error 7")))
+    | If(c,if_clause,then_clause) ->
+       (let v0 = evalExpr c env in 
+       (match v0 with 
+        BoolVal(b) -> if b then (evalExpr if_clause env) else (evalExpr then_clause env)
+       | _ -> raise(DynamicTypeError "dynamic type error 6")))
+    | Function(pat, e) ->  FunctionVal(None, pat, e, env)
+    | Tuple(l) -> TupleVal(List.map(fun elem -> evalExpr elem env) l)  
+    | Data(s,expr_op) -> (match expr_op with 
+                None -> DataVal(s, None)
+              | Some(something) -> let value = evalExpr something env in 
+                DataVal(s,Some(value)))
+    | Match(e1, l) ->( 
+        match e1 with 
+        Var(s) -> (let evalE = (evalExpr e1 env) in 
+          let (res_pat, res_expr) = (matchHelper evalE l (Some(s))) in 
+            let new_env = (Env.combine_envs env (patMatch res_pat evalE)) in
+              evalExpr res_expr new_env)
+        | _ -> let evalE = (evalExpr e1 env) in 
+            let (res_pat, res_expr) = (matchHelper evalE l None) in
+            let new_env = (Env.combine_envs env (patMatch res_pat evalE)) in           
+              evalExpr res_expr new_env )
+      (*let evalE = (evalExpr e1 env) in 
+        let (res_pat, res_expr) = (matchHelper evalE l ) in
+          let new_env = (Env.combine_envs env (patMatch res_pat evalE)) in
+            evalExpr res_expr new_env *)
+        (*IntVal(69)*)
+    | FunctionCall(e1, e2) -> 
+          (let funcVal = evalExpr e1 env in 
+              match funcVal with 
+              FunctionVal(func_s,func_pat,func_expr,func_env) -> 
+                  (let args = evalExpr e2 env in 
+                    let new_fun_env = Env.combine_envs func_env (patMatch func_pat args) in 
+                        (* BACKUP WORKING LINE evalExpr func_expr new_fun_env*)
+                        match func_s with 
+                          None -> evalExpr func_expr new_fun_env
+                          | Some(rec_fun_name) -> let new_fun_env' = (Env.add_binding rec_fun_name (evalExpr e1 env) new_fun_env) in
+                            evalExpr func_expr new_fun_env'
+                  )
+              | _ -> raise(DynamicTypeError "dynamic type error 3")
+            )
+    | _ -> raise (DynamicTypeError "dynamic type error 4")    
+    
 
 
 (* Evaluate a declaration in the given environment.  Evaluation

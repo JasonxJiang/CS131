@@ -15,13 +15,14 @@
 *)
 let tests = [
     (* YOU NEED TO ADD A LOT MORE TESTS! *)
-    ("let rec fact x = match x with 0 -> 1 | x -> x * (fact (x-1))","val fact = <fun>");
-    ("fact 10","3628800");
+
 		("3", "3"); 
 		("false", "false");
 		("let x = 34", "val x = 34");
 		("y", "dynamic type error");
 		("x + 4", "38");
+     (*) ("let rec fact x = match x with 0 -> 1 | x -> x * (fact (x-1))","val fact = <fun>");
+    ("fact 10","3628800");*)
     (*Alex's TestCases*)
     ("let f = function x -> x", "val f = <fun>");
     ("let f2 = function y -> x", "val f2 = <fun>");
@@ -77,9 +78,7 @@ let tests = [
     ("m (Leaf(5,6)) true", "11");
     ("m 1 false","2");
     ("m Leaf false", "2");                  (* Confirming DataVal matching *)
-    ("m 1 2", "match failure");             (* Confirming Match Failure when no expressions match *)
-    ("let m1 (a,b) -> match (a,b) with (true,1) -> 1 | (Leaf(a,b),_) -> a + b | (_,false) -> 2  ", "val m1 = <fun>");
-    ("m1 (Leaf,false)", "2");    
+    ("m 1 2", "match failure");             (* Confirming Match Failure when no expressions match *) 
     ("let rec test a = function b -> match (a,b) with (true,1) -> 1 | (_,false) -> 2", "val test = <fun>");
     ("test Leaf false", "2");   
     ("test true 1", "1"); 
