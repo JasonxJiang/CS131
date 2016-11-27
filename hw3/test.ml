@@ -21,8 +21,8 @@ let tests = [
 		("let x = 34", "val x = 34");
 		("y", "dynamic type error");
 		("x + 4", "38");
-     (*) ("let rec fact x = match x with 0 -> 1 | x -> x * (fact (x-1))","val fact = <fun>");
-    ("fact 10","3628800");*)
+      ("let rec fact x = match x with 0 -> 1 | x -> x * (fact (x-1))","val fact = <fun>");
+    ("fact 10","3628800");
     (*Alex's TestCases*)
     ("let f = function x -> x", "val f = <fun>");
     ("let f2 = function y -> x", "val f2 = <fun>");
